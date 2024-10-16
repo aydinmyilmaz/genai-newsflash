@@ -1,0 +1,9 @@
+file_paths:
+  edited_link_file: ./sources/links.txt
+  output_dir: ./data/summaries
+  prompt_folder: ./sources/prompts/
+  topic_file: ./sources/topic.txt
+max_input_tokens: 5000
+max_tokens_per_request: 500
+token_threshold: 300
+use_requests_html: true
