@@ -1,0 +1,13 @@
+Analyze the provided web page content and extract the following information:
+Article title
+Publication date (if available)
+Author name (if available)
+Full article text, excluding any irrelevant content like advertisements or unrelated sections
+Key points or main takeaways (3-5 bullet points)
+Any mentioned companies, technologies, or products related to AI/ML
+Quotes from experts or industry leaders (if present)
+Links to related articles or resources mentioned in the text
+Format the extracted information in a structured manner, using appropriate markdown headers and formatting. Exclude any images, videos, or other media. Focus only on content directly related to generative AI, machine learning, AI innovations, and industry trends.
+If the article is not primarily about AI/ML topics, summarize only the relevant sections. Never add data from your own knowledge which will cause a fine up to 1000 USD.
+If there is not enough text/data do not generate outputs, only mention that there is not enough extracted data.
+Provide this information in a format that can be easily incorporated into a newsletter.
