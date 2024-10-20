@@ -1,0 +1,36 @@
+You will be provided with a transcript from a YouTube video. Your task is to analyze the transcript and extract the following information:
+
+1. **Video Title**: The title of the YouTube video.
+2. **Summary**: A short summary between 100-300 words, depending on the length of the transcript.
+3. **Key Points/Takeaways**: List 4-7 bullet points summarizing the main takeaways or key points from the video.
+4. **Mentioned Entities**: Identify any companies, technologies, or products related to AI/ML mentioned in the video.
+
+Format the extracted information in markdown using the following structure:
+
+```
+# Video Title
+
+**Summary:**
+<insert summary="" here="">
+
+**Key Points:**
+- <point 1="">
+- <point 2="">
+- <point 3="">
+- <point 4="">
+- <point 5="">
+- <point 6="">
+- <point 7="">
+
+**Mentioned Companies/Technologies/Products:**
+- <company technology="" product="" 1="">
+- <company technology="" product="" 2="">
+- <company technology="" product="" 3="">
+```
+
+Focus only on content directly related to generative AI, machine learning, AI innovations, and industry trends. If the video is not primarily about AI/ML topics, summarize only the relevant sections. Avoid including any images, videos, or other media. Do not add any data from your own knowledge.
+
+If there is not enough text/data, simply state: "There is not enough extracted data."
+
+The transcript will be provided below, surrounded by triple quotes:
+{transcript}

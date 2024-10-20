@@ -56,31 +56,26 @@ def save_prompt(updated_prompt, prompt_file_path):
 
 # Function to update configuration via Streamlit
 def update_config():
-    with st.sidebar.expander("Update Configuration", expanded=True):
+    with st.expander("Update Configuration", expanded=False):
         # Input fields for API key and model name
-        new_api_key = st.sidebar.text_input("Enter new OPENAI_API_KEY:")
+        new_api_key = st.text_input("API Key", placeholder="Enter your API key here")
 
         # Dropdown for model selection
         model_options = ["gpt-4o", "gpt-4o-mini", "llama-3.1-8b-instruct"]
-        new_model_name = st.sidebar.selectbox("Select model name:", model_options)
+        new_model_name = st.selectbox("Model Selection:", model_options)
 
-        # Approval checkbox
-        approval = st.sidebar.checkbox("Approve changes")
+        if st.button("Save Configuration"):
+            with open('config.yml', 'r') as file:
+                config = yaml.safe_load(file)
 
-        if st.sidebar.button("Update Config"):
-            if approval:
-                # Load existing config
-                with open('config.yml', 'r') as file:
-                    config = yaml.safe_load(file)
+            # Update the config
+            config['OPENAI_API_KEY'] = new_api_key
+            config['openai_model_name'] = new_model_name
 
-                # Update the config
-                config['OPENAI_API_KEY'] = new_api_key
-                config['openai_model_name'] = new_model_name
+            # Write back to the config file
+            with open('config.yml', 'w') as file:
+                yaml.dump(config, file)
 
-                # Write back to the config file
-                with open('config.yml', 'w') as file:
-                    yaml.dump(config, file)
-
-                st.sidebar.success("Config updated successfully.")
-            else:
-                st.sidebar.warning("Please approve the changes to update the config.")
+            st.success("Config updated successfully.")
+        else:
+            st.warning("Please approve the changes to update the config.")

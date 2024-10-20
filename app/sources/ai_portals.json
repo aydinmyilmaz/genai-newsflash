@@ -1,0 +1,80 @@
+{
+    "ai_news_websites": [
+      {
+        "name": "TechCrunch AI",
+        "url": "https://techcrunch.com/category/artificial-intelligence/"
+      },
+      {
+        "name": "MIT Technology Review",
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/"
+      },
+      {
+        "name": "VentureBeat AI",
+        "url": "https://venturebeat.com/category/ai/"
+      },
+      {
+        "name": "Wired",
+        "url": "https://www.wired.com/tag/artificial-intelligence/"
+      },
+      {
+        "name": "OpenAI Blog",
+        "url": "https://openai.com/blog/"
+      },
+      {
+        "name": "DeepMind Blog",
+        "url": "https://deepmind.com/blog"
+      },
+      {
+        "name": "Google AI Blog",
+        "url": "https://ai.googleblog.com/"
+      },
+      {
+        "name": "AI News",
+        "url": "https://artificialintelligence-news.com/"
+      },
+      {
+        "name": "Forbes AI",
+        "url": "https://www.forbes.com/ai/"
+      },
+      {
+        "name": "The Verge AI",
+        "url": "https://www.theverge.com/ai-artificial-intelligence"
+      },
+      {
+        "name": "Artificial Intelligence News",
+        "url": "https://www.artificialintelligence-news.com/"
+      },
+      {
+        "name": "Analytics Insight Magazine",
+        "url": "https://www.analyticsinsight.net/"
+      },
+      {
+        "name": "AI Trends",
+        "url": "https://www.aitrends.com/"
+      },
+      {
+        "name": "Unite.AI",
+        "url": "https://www.unite.ai/"
+      },
+      {
+        "name": "DataRobot Blog",
+        "url": "https://www.datarobot.com/blog/"
+      },
+      {
+        "name": "Machine Learning Mastery",
+        "url": "https://machinelearningmastery.com/blog/"
+      },
+      {
+        "name": "MarkTechPost",
+        "url": "https://www.marktechpost.com/"
+      },
+      {
+        "name": "BAIR Blog",
+        "url": "https://bair.berkeley.edu/blog/"
+      },
+      {
+        "name": "AI Magazine",
+        "url": "https://www.aimag.com/"
+      }
+    ]
+  }

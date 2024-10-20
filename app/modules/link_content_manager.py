@@ -84,9 +84,8 @@ def run_update_process(link_file_path):
         st.error(f"Failed to run the update process: {str(e)}")
         logger.error(f"Failed to run the update process for {link_file_path}: {str(e)}")
 
-def main():
+def link_content_manager():
     logger.info("Starting Streamlit application")
-    st.title("File Editor for Topics, Links, and Search Results Update")
     config = load_config()
 
     # Verify that 'file_paths' exists in the config and contains 'link_file'
@@ -102,12 +101,16 @@ def main():
     search_result_path = link_file_path  # Using the corrected variable
 
     file_editor("Link File", link_path)
-    with st.expander("🔗 View Links Details", expanded=False):
+    # Create tabs instead of expanders
+    tabs = st.tabs(["🔗 View Links Details", "📋 View Link File Content"])
+
+    with tabs[0]:
         display_links_as_strings(search_result_path)
-    with st.expander("📋 View Link File Content", expanded=False):
+
+    with tabs[1]:
         if st.button("🔍 Show Link Content"):
             display_file_content(link_path)
 
 
 if __name__ == '__main__':
-    main()
+    link_content_manager()

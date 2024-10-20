@@ -1,47 +1,44 @@
-Specify the text generation task with clear guidelines on the token limit, formatting, and structure. Here's an example outline:
+Your task is to summarize a given article on Generative AI. The summary should be clear, concise, and formatted in markdown (.md) format with all subheaders in smaller sizes for better readability.
 
-Task: Summarize a given article on Generative AI. Ensure the summary is clear, concise, and in proper .md format, with all subheaders formatted in a smaller size for better readability.
-
-Guidelines:
-- Make sure the summary does not exceed 500 tokens.
-- Use smaller subheaders by leveraging markdown syntax (e.g., `###` or bold text).
-- Organize the content with headings, and ensure the text is easy to read.
+Follow these guidelines:
+- Ensure the summary does not exceed 500 tokens.
+- Use smaller subheaders by leveraging markdown syntax (e.g., `###`).
+- Organize the content with clear headings, and ensure the text is easy to read.
 
 ## Structure:
-- **Article Title**
-  [Insert the title of the article here]
 
-- **Brief Overview**
-  - Provide a 2-3 sentence overview of the article's main focus, if possible
+**Article Title:**
+Provide the title of the article here.
 
-- **Key Points**
-  - Bullet point the main ideas or arguments presented in the article
-  - Use subheaders to organize related points if necessary and if the article structure supports it
+**Brief Overview:**
+- Write a 2-3 sentence overview of the article's main focus.
 
-- **Technical Aspects** (if applicable)
-  - Highlight any specific AI models, algorithms, or technologies mentioned
-  - Explain their relevance or impact as described in the article
+**Key Points:**
+- List the main ideas or arguments presented in the article as bullet points.
+- Use subheaders to organize related points if necessary.
 
-- **Applications and Use Cases** (if discussed)
-  - List potential or existing applications mentioned in the article
-  - Include any industry-specific examples provided
+**Technical Aspects:** (if applicable)
+- Highlight any specific AI models, algorithms, or technologies mentioned.
+- Explain their relevance or impact as described in the article.
 
-- **Challenges and Limitations** (if addressed)
-  - Outline any obstacles or drawbacks mentioned
-  - Include ethical considerations if they are part of the discussion
+**Applications and Use Cases:** (if discussed)
+- List potential or existing applications mentioned in the article.
+- Include any industry-specific examples provided.
 
-- **Future Implications** (if mentioned)
-  - Summarize any predictions or future developments discussed in the article
+**Challenges and Limitations:** (if addressed)
+- Outline any obstacles or drawbacks mentioned.
+- Include ethical considerations if they are part of the discussion.
 
-- **Key Takeaways**
-  - Provide 3-5 bullet points summarizing the most important insights from the article
+**Future Implications:** (if mentioned)
+- Summarize any predictions or future developments discussed in the article.
 
-- **Relevance to Our Organization** (if applicable)
-  - If the article mentions implications for specific industries or organizations, briefly note how this information might apply to our company or industry
+**Key Takeaways:**
+- Provide 3-5 bullet points summarizing the most important insights from the article.
 
-## Article
+**Relevance to Our Organization:** (if applicable)
+- Briefly note how the information might apply to our company or industry if the article mentions specific implications.
+
+## Article:
+Please insert the full article text in quotation marks here.
+
 Remember, the summary should be concise and should not exceed 500 tokens.
-
-
-"""
-

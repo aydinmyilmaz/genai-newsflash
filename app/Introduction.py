@@ -3,11 +3,16 @@ import yaml
 from modules.helpers import update_config
 
 # Set the page title and icon
-st.set_page_config(page_title="GenAI Newsflash", page_icon="📰")
+st.set_page_config(page_title="Smart Newsflash", page_icon="📰")
+
 
 # Main heading
-st.title("Welcome to GenAI Newsflash 📰")
+st.title("Welcome to Smart Newsflash 📰")
 
+st.subheader("Configurations")
+
+# Call the update_config function
+update_config()
 # Introduction text
 st.markdown("""
 ### Your AI-Powered News Summarizer 🧠
@@ -38,63 +43,3 @@ st.markdown("""
 Simply input your links and let **GenAI Newsflash** do the rest!
 """)
 
-# Checkbox for playing music
-st.sidebar.audio("Good_for_All.mp3", format="audio/mp3")
-
-# Checkbox for showing lyrics
-if st.sidebar.checkbox("Show Lyrics"):
-    st.sidebar.markdown("""
-    **Lyrics**
-
-    *(Verse 1)*\n\n
-    Every aisle, a promise kept, trust in every step,\n
-    Efficiency and warmth in every corner we prep.\n
-    Streamlined paths, our vision’s clear,\n
-    Gutes für Alle, friendly smiles here to cheer.\n\n
-
-    *(Chorus)*\n\n
-    Good for All, that’s our creed,\n
-    Trust and friendliness in every deed.\n
-    Consistent quality, unbeatable price,\n
-    Aldi Süd’s promise, precise and nice.\n\n
-
-    *(Verse 2)*\n
-    Choices made with care, for you, for all,\n
-    Sustainable and trustworthy, we answer the call.\n
-    Quick decisions, efficient lines,\n
-    Clarity and warmth in our signs.\n\n
-
-    *(Chorus)*\n
-    Good for All, that’s our creed,\n
-    Trust and friendliness in every deed.\n
-    Consistent quality, unbeatable price,\n
-    Aldi Süd’s promise, precise and nice.\n\n
-
-    *(Bridge)*\n
-    Honest deals, open doors,\n
-    Fair to all, on all our floors.\n
-    Duty to planet and every guest,\n
-    In responsibility, we invest.\n\n
-
-    *(Verse 3)*\n
-    A welcoming space where values meet grace,\n
-    In every product, a friendly face.\n
-    Commitment deep, in every way,\n
-    For every customer, every day.\n\n
-
-    *(Chorus)*\n
-    Good for All, that’s our creed,\n
-    Trust and friendliness in every deed.\n
-    Consistent quality, unbeatable price,\n
-    Aldi Süd’s promise, precise and nice.\n\n
-
-    *(Outro)*\n
-    Come join us, feel the community call,\n
-    At Aldi Süd, it’s Good for All.\n
-    Embrace our mission, join the stride,\n
-    Together, with trust and pride.\n\n
-    """)
-
-
-# Call the update_config function
-update_config()

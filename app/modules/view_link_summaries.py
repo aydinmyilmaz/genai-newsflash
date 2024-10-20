@@ -110,27 +110,57 @@ def display_content_in_new_page(content):
         st.warning("Content is not in list format. Displaying all content as JSON.")
         st.json(content)
 
-def main():
-    st.set_page_config(layout="wide", page_title="View Summaries")
-    st.title("View Summaries")
-
+def view_link_summaries():
     file_options = load_summary_files()
     if not file_options:
         st.error("No summary files found.")
         return
 
     selected_file = st.selectbox("Select a summary file to view:", options=file_options, format_func=lambda x: f"{x[0]} (Last modified: {x[1]})")
+
     if selected_file:
         content = load_summary_content(selected_file[0])
         if content:
-            # Initialize session state for selected keys if not already done
-            if 'selected_keys' not in st.session_state:
-                st.session_state.selected_keys = []
+            if isinstance(content, list):
+                item_options = [f"Item {i + 1}" for i in range(len(content))]
+                selected_items = st.multiselect("Select items to display:", item_options)
+                selected_indices = [int(item.split()[-1]) - 1 for item in selected_items]
 
-            # Add a button to save the displayed content as a .docx file
-            if st.sidebar.button("Save as .docx"):
-                if st.session_state.selected_keys:
-                    file_path = save_to_docx(content, selected_file[0], st.session_state.selected_keys)  # Pass the selected keys
+                # Collect all possible keys from the selected items in the content
+                all_possible_keys = set()
+                for index in selected_indices:
+                    if isinstance(content[index], dict):
+                        all_possible_keys.update(content[index].keys())
+
+                # Convert the set to a list
+                possible_keys = list(all_possible_keys)
+
+                # Multi-select box for all possible text parts, with default as all possible keys
+                selected_keys = st.multiselect(
+                    "Select parts to display for selected items:",
+                    possible_keys,
+                    default=possible_keys  # Set default selections to all possible keys
+                )
+
+                # Checkbox to control display of selected parts
+                display_selected = st.checkbox("Display selected parts")
+
+                # Display the selected parts for all selected items if the checkbox is checked
+                if display_selected:
+                    for index in selected_indices:
+                        dictionary = content[index]
+                        if isinstance(dictionary, dict):
+                            display_dictionary_content(dictionary, selected_keys)
+                        else:
+                            st.error("The selected item is not a dictionary.")
+            else:
+                st.warning("Content is not in list format. Displaying all content as JSON.")
+                st.json(content)
+
+            # Move the "Save as .docx" button below the checkbox
+            if st.button("Save as .docx"):
+                if selected_keys:
+                    file_path = save_to_docx(content, selected_file[0], selected_keys)  # Pass the selected keys
                     if file_path:  # If the file was saved successfully
                         with open(file_path, "rb") as f:
                             st.download_button(
@@ -141,37 +171,11 @@ def main():
                             )
                 else:
                     st.error("Please select parts to display before saving.")
-
-
-            if isinstance(content, list):
-                item_options = [f"Item {i + 1}" for i in range(len(content))]
-                selected_items = st.multiselect("Select items to display:", item_options)
-                selected_indices = [int(item.split()[-1]) - 1 for item in selected_items]
-
-                # Get dictionary keys from the first selected item to display in a single multi-select box
-                if selected_indices:
-                    first_item = content[selected_indices[0]]
-                    if isinstance(first_item, dict):
-                        dict_keys = list(first_item.keys())
-                        st.session_state.selected_keys = st.multiselect("Select parts to display for selected items:", dict_keys)
-
-                        # Display the selected parts for all selected items
-                        for index in selected_indices:
-                            dictionary = content[index]
-                            if isinstance(dictionary, dict):
-                                display_dictionary_content(dictionary, st.session_state.selected_keys)
-                            else:
-                                st.error("The selected item is not a dictionary.")
-                    else:
-                        st.warning("The selected item is not a dictionary.")
-            else:
-                st.warning("Content is not in list format. Displaying all content as JSON.")
-                st.json(content)
         else:
             st.error("Failed to load the selected file content.")
 
 if __name__ == "__main__":
-    main()
+    view_link_summaries()
 
 
 
