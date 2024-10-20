@@ -39,3 +39,6 @@ ehthumbs.db
 *.local
 *temp*
 
+.DS_Store
+.venv/
+app.zip
