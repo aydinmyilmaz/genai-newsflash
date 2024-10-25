@@ -45,3 +45,7 @@ ehthumbs.db
 .DS_Store
 .venv/
 app.zip
+
+*output*
+*.venv*
+config.yml

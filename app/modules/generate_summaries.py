@@ -32,8 +32,7 @@ logger.info(f"Environment variable for API key set. Max tokens per request: {max
 prompt_file_path = config['file_paths']['prompt_file']
 topic_file_path = config['file_paths']['topic_file']
 manual_link_file_path = config['file_paths']['manual_link_file']
-link_result_file_path = config['file_paths']['link_result_file']
-scrapped_result_file_path = config['file_paths']['scrapped_result_file']
+
 
 # Initialize the ChatOpenAI model
 chat = ChatOpenAI(model_name=model_name, temperature=0, max_tokens=max_tokens_per_request)

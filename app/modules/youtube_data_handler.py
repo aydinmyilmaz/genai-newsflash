@@ -9,19 +9,25 @@ import tiktoken
 import requests
 from bs4 import BeautifulSoup
 import re
+import json
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# def validate_youtube_link(link):
+#     # Regex pattern to match standard YouTube video links, channel links, user links, and new handle format
+#     pattern = r'^(https?://)?(www\.)?(youtube\.com/(watch\?v=|channel/|user/|@)|youtu\.be/)[\w-]{11}$|^https?://www\.youtube\.com/@[\w-]+$'
+
+#     # Check for channel links specifically
+#     channel_pattern = r'^(https?://)?(www\.)?youtube\.com/channel/[\w-]+$'
+
+#     return re.match(pattern, link) is not None or re.match(channel_pattern, link) is not None
 
 def validate_youtube_link(link):
     # Regex pattern to match standard YouTube video links, channel links, user links, and new handle format
-    pattern = r'^(https?://)?(www\.)?(youtube\.com/(watch\?v=|channel/|user/|@)|youtu\.be/)[\w-]{11}$|^https?://www\.youtube\.com/@[\w-]+$'
-
-    # Check for channel links specifically
-    channel_pattern = r'^(https?://)?(www\.)?youtube\.com/channel/[\w-]+$'
-
-    return re.match(pattern, link) is not None or re.match(channel_pattern, link) is not None
+    pattern = r'^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|live\/)|youtu\.be\/)[\w-]{11}$|^(https?:\/\/)?(www\.)?youtube\.com\/(@[\w-]+)$|^(https?:\/\/)?(www\.)?youtube\.com\/(channel\/|user\/)[\w-]+$'
+    return re.match(pattern, link) is not None
 
 def extract_video_ids_from_channel(channel_url: str, max_results: int = 5) -> List[str]:
     """
@@ -56,14 +62,41 @@ def extract_video_ids(link: str, max_results: int = 5) -> List[str]:
 
     # If it's a single video link, extract the video ID
     youtube_regex = re.compile(
-        r'(?:v=|\/)([0-9A-Za-z_-]{11}).*'
+        r'(?:v=|\/|embed\/|live\/)([0-9A-Za-z_-]{11})'
     )
     match = re.search(youtube_regex, link)
     if match:
         return [match.group(1)]
     else:
-        return []
+        # Handle youtu.be format
+        youtu_be_regex = re.compile(
+            r'^https?:\/\/(?:www\.)?youtu\.be\/([0-9A-Za-z_-]{11})$'
+        )
+        youtu_be_match = re.search(youtu_be_regex, link)
+        if youtu_be_match:
+            return [youtu_be_match.group(1)]
+        else:
+            return []
 
+# def extract_video_ids(link: str, max_results: int = 5) -> List[str]:
+#     """
+#     Extracts the video IDs from a YouTube link.
+#     If the link is a channel URL, extract the latest video IDs.
+#     """
+#     if "channel/" in link:
+#         return extract_video_ids_from_channel(link, max_results)
+
+#     # If it's a single video link, extract the video ID
+#     youtube_regex = re.compile(
+#         r'(?:v=|\/)([0-9A-Za-z_-]{11}).*'
+#     )
+#     match = re.search(youtube_regex, link)
+#     if match:
+#         return [match.group(1)]
+#     else:
+#         return []
+
+#
 
 def get_channel_id(channel_url):
     try:
@@ -162,9 +195,14 @@ def save_links(links: List[str], file_path: str) -> None:
     """
     Saves the list of YouTube links to a text file.
     """
+    if not links:  # Check if the links list is empty
+        logging.warning("No links to save.")
+        return  # Exit the function if there are no links
+
     with open(file_path, 'w', encoding='utf-8') as f:
         for link in links:
             f.write(f"{link}\n")
+    logging.info(f"Saved {len(links)} links to {file_path}")  # Log message added
 
 def load_links(file_path: str) -> List[str]:
     """
@@ -173,6 +211,8 @@ def load_links(file_path: str) -> List[str]:
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             links = [line.strip() for line in f if line.strip()]
+        logging.info(f"Loaded {len(links)} links from {file_path}")  # Log message added
         return links
     except FileNotFoundError:
-        return []
+        logging.warning(f"File not found: {file_path}. A new file will be created.")  # Log message added
+        return []  # Return an empty list if the file does not exist

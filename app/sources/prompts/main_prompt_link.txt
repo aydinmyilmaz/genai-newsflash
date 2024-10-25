@@ -12,7 +12,7 @@ You are an expert content analyst on AI, Generative AI, Data Science, NLP and re
 
 Provide a concise summary capturing the essence of the article.
 
-3. Main Takeaways or Key Points 🔑
+3. Key Points 🔑
 
    - Summarize 4-7 of the most important points using bullet points.
    - Each point should be short (1-2 sentences), capturing a major insight or finding.
@@ -22,22 +22,22 @@ Provide a concise summary capturing the essence of the article.
      - "OpenAI released a new model focused on healthcare applications."
      - "The report highlights a significant shift in AI investment trends across Europe."
 
-4. Companies, Technologies, or Products Related to AI/ML 🏢
+4. Important Entities 🏢
 
    - Identify any companies, technologies, or products mentioned.
-   - Aim for 2-5 entries that are directly relevant to the AI/ML context.
+   - Aim for 3-6 entries that are directly relevant to the AI/ML context.
 
-5. Implications and Industry Trends 🌐
+5. Implications and Trends 📈
 
    - Highlight any significant implications discussed in the article.
    - Address how these implications relate to the wider AI/ML industry or impact ongoing trends.
    - Frame implications in terms of either positive outcomes, challenges, or opportunities.
 
-6. Intended Audience
+6. Intended Audience 👥
 
   - Intented audience who are likely interested in this topic and news, withut additional explanation.
 
-7. URL
+7. URL 🌐
 
    - Full URL if exists in the text
 
@@ -75,27 +75,27 @@ OUTPUT SCHEMA:
 
 *Short summary between 100-200 words goes here*
 
-### Main Takeaways or Key Points 🔑
+### Key Points 🔑
 
 - Summary of key point 1
 - Summary of key point 2
 - Summary of key point 3
 - ...
 
-### Companies, Technologies, or Products Related to AI/ML 🏢
+### Important Entities 🏢
 
 - Company/Technology/Product 1,
 - Company/Technology/Product 2,
 - ...
 
 
-### Implications and Industry Trends 📈
+### Implications and Trends 📈
 
 - Trend or Implication 1: *Brief detail on how it impacts the industry*
 - Trend or Implication 2: *Brief detail on opportunities or challenges*
 - ...
 
-###  Intended Audience
+###  Intended Audience 👥
   -  Audience 1
   -  Audience 2
   - ...

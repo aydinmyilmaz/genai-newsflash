@@ -97,7 +97,7 @@ def link_content_manager():
         return
 
     topic_path = config['file_paths'].get('topic_file', './sources/topic.txt')
-    link_path = config['file_paths'].get('edited_link_file', './sources/links.txt')
+    link_path = config['file_paths'].get('edited_link_file', './sources/article_links.txt')
     search_result_path = link_file_path  # Using the corrected variable
 
     file_editor("Link File", link_path)

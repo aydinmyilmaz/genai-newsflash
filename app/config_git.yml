@@ -1,0 +1,34 @@
+# config.yml
+
+use_requests_html: True
+
+max_input_tokens: 5000  # Token count threshold to put in prompt
+max_tokens_per_request: 500
+
+OPENAI_API_KEY: sk-proj-
+openai_model_name: gpt-4o-mini
+#
+token_threshold: 300 # Token count threshold to summarize
+# config.yml
+file_paths:
+  prompt_folder: './sources/prompts/'
+  topic_file: './sources/topic.txt'
+  edited_link_file: './sources/article_links.txt'
+
+  youtube_links_file: './sources/youtube_links.txt'
+  youtube_transcripts_folder: "./output/transcripts_youtube/"
+
+  output_dir_youtube: './output/summaries_youtube/'
+  output_dir_article: './output/summaries_article/'
+
+  LINKS_FILE_PATH: './sources/youtube_links.txt'
+
+  generated_article_links: "./output/generated_article_links/"
+
+  main_prompt_youtube: './sources/prompts/main_prompt_youtube.txt'
+
+  output_article_summaries_word_docs: ./output/article_summaries_word_docs/
+
+
+
+
