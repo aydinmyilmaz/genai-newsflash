@@ -192,39 +192,6 @@ def view_link_summaries():
         else:
             st.error("Failed to load the selected file content.")
 
-# def process_selected_content(content, json_file_name: str):
-#     if isinstance(content, list):
-#         item_options = [f"Article {i + 1}" for i in range(len(content))]
-#         selected_items = st.multiselect("Select items to display:", item_options, default=item_options)
-#         selected_indices = [int(item.split()[-1]) - 1 for item in selected_items]
-
-#         possible_keys = collect_possible_keys(content, selected_indices)
-
-#         selected_keys = st.multiselect(
-#             "Select parts to display for selected items:",
-#             possible_keys,
-#             default=possible_keys
-#         )
-
-#         if st.checkbox("Display selected parts"):
-#             for index in selected_indices:
-#                 dictionary = content[index]
-#                 if isinstance(dictionary, dict):
-#                     display_dictionary_content(dictionary, selected_keys)
-#                 else:
-#                     st.error("The selected item is not a dictionary.")
-
-#         if st.button("Save as .docx"):
-#             if selected_keys:
-#                 file_path = save_to_word(content, json_file_name, selected_keys)
-#                 if file_path:
-#                     display_download_button()
-#             else:
-#                 st.error("Please select parts to display before saving.")
-#     else:
-#         st.warning("Content is not in list format. Displaying all content as JSON.")
-#         st.json(content)
-
 def process_selected_content(content, json_file_name: str):
     if isinstance(content, list):
         # Automatically process all items in the content

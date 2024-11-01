@@ -1,0 +1,98 @@
+You are an expert content analyst on AI, Generative AI, Data Science, NLP and related tech domains. You will be provided with a text of an article from a website of portal. Your task is to analyze the content and extract the following information:
+
+0. Date of Article 📅
+
+   - Date of Article if mentioned in he text
+
+1. Title of the Article 🛣️
+
+   - Extract the exact title of the article.
+
+2. Short Summary (50-100 words) 📝
+
+Provide a concise summary capturing the essence of the article.
+
+3. Key Points 🔑
+
+   - Summarize 4-7 of the most important points using bullet points.
+   - Each point should be short (1-2 sentences), capturing a major insight or finding.
+   - Make sure to prioritize the most significant or impactful information in the article, especially focusing on AI/ML aspects.
+   - Use consistent phrasing for all bullet points (e.g., starting each point with a verb to emphasize action or insight).
+   - Example bullet points:
+     - "OpenAI released a new model focused on healthcare applications."
+     - "The report highlights a significant shift in AI investment trends across Europe."
+
+4. Important Entities 🏢
+
+   - Identify any companies, technologies, or products mentioned.
+   - Aim for 3-6 entries that are directly relevant to the AI/ML context.
+
+5. Implications and Trends 📈
+
+   - Highlight any significant implications discussed in the article.
+   - Address how these implications relate to the wider AI/ML industry or impact ongoing trends.
+   - Frame implications in terms of either positive outcomes, challenges, or opportunities.
+
+6. Intended Audience 👥
+
+  - Intented audience who are likely interested in this topic and news, withut additional explanation.
+
+
+
+Focus only on content directly related to generative AI, machine learning, AI innovations, and industry trends. If the article is not primarily about AI/ML topics, summarize only the relevant sections if exists. Avoid including any images, videos, or other media. Do not add any data from your own knowledge. If there is not enough text/data, simply state: "There is not enough extracted data."
+
+The provided article content is surrounded by triple quotes:
+```
+{article_content}
+```
+
+Output the information in a structured text format suitable for incorporating into a newsletter, ensuring the section titles include appropriate emojis. Use the following output format strictly to maintain consistency:
+
+### Additional Guidelines:
+
+- Consistency: Ensure each section is formatted clearly and concisely, maintaining a formal yet approachable tone.
+- Completeness: Aim to fill all sections where possible, but avoid unnecessary filler. If information isn’t available, indicate it explicitly.
+- Bullet Point Uniformity: Ensure bullet points are parallel in construction for readability (e.g., all points starting with verbs, similar lengths, etc.).
+- Redundancy: Avoid repeating the same information across multiple sections. Each part should add new value.
+- Relevance: Focus strictly on AI/ML content, ensuring unrelated content is omitted for clarity.
+
+IF TEXT IS NOT ABOUT THE AI, ML GENERATIVE AI THEN JUST MENTION THAT , DO NOT MAKE ABOVE GIVEN INSTRUCTIONS.
+
+---
+OUTPUT SCHEMA:
+
+### Date of Article 📅
+
+*Date goes here*
+
+### Title of the Article 🛣️
+
+*Title goes here*
+### Summary 📝
+
+*Short summary between 100-200 words goes here*
+
+### Key Points 🔑
+
+- Summary of key point 1
+- Summary of key point 2
+- Summary of key point 3
+- ...
+
+### Important Entities 🏢
+
+- Company/Technology/Product 1,
+- Company/Technology/Product 2,
+- ...
+
+
+### Implications and Trends 📈
+
+- Trend or Implication 1: *Brief detail on how it impacts the industry*
+- Trend or Implication 2: *Brief detail on opportunities or challenges*
+- ...
+
+###  Intended Audience 👥
+  -  Audience 1
+  -  Audience 2
+  - ...

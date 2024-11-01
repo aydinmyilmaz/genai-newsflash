@@ -5,7 +5,7 @@ import logging
 
 # Ensure these modules are correctly handling the paths and parameters
 from modules.helpers import load_file, save_file, count_items_in_json, load_json, load_config
-from modules.generate_link import run_link_update
+# from modules.generate_link import run_link_update
 
 # Configure logging
 logging.basicConfig(
@@ -74,15 +74,15 @@ def display_links_as_strings(file_path):
             st.write("---")  # Line separator
         logger.info(f"Displayed links for topic {topic} from {file_path}")
 
-def run_update_process(link_file_path):
-    """Run the external get_link.py logic directly by calling the function."""
-    try:
-        run_link_update(link_file_path)
-        st.success("Search results updated successfully!")
-        logger.info(f"Search results updated successfully for {link_file_path}")
-    except Exception as e:
-        st.error(f"Failed to run the update process: {str(e)}")
-        logger.error(f"Failed to run the update process for {link_file_path}: {str(e)}")
+# def run_update_process(link_file_path):
+#     """Run the external get_link.py logic directly by calling the function."""
+#     try:
+#         run_link_update(link_file_path)
+#         st.success("Search results updated successfully!")
+#         logger.info(f"Search results updated successfully for {link_file_path}")
+#     except Exception as e:
+#         st.error(f"Failed to run the update process: {str(e)}")
+#         logger.error(f"Failed to run the update process for {link_file_path}: {str(e)}")
 
 def link_content_manager():
     logger.info("Starting Streamlit application")

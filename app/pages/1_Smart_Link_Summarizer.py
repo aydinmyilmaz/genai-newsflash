@@ -10,8 +10,8 @@ import logging
 from datetime import datetime
 import time
 import hashlib
-from docx import Document
-
+from docx import Document # Import the search function
+from modules.search_filter import SearchModule
 # Set page configuration at the top
 st.set_page_config(layout="wide", page_title="Smart Link Summarizer")
 
@@ -410,7 +410,15 @@ def fetch_ai_news_links():
 def get_user_input():
     """Handles user input for URLs and number of links to retrieve."""
     urls_input = st.text_area("Enter URLs (one per line)", height=200, help="Input up to 10 URLs to be processed.")
-    urls = urls_input.strip().splitlines()[:10]  # Limit input to 10 URLs
+
+    n_value_portal = st.number_input(
+        "Select number of portals to process:",
+        min_value=1,
+        max_value=50,
+        value=10,
+        help="Set how many links to retrieve from each URL."
+    )
+    urls = urls_input.strip().splitlines()[:n_value_portal]  # Limit input to 10 URLs
 
     n_value = st.number_input(
         "Select number of links to retrieve from each URL:",
@@ -494,44 +502,228 @@ def merge_results(combined_results, result, n_value):
 
     return combined_results
 
-
-def save_combined_results(combined_results, successful_count, config_2):
+def save_combined_results(combined_results, successful_count, config):
     """Saves the combined results to JSON and text files."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    folder_dir = config_2['file_paths']['generated_article_links']
-    output_file_path = f"{folder_dir}/links_{timestamp}.json"
+    # folder_dir = config['file_paths']['generated_article_links']
+    folder_dir = config['file_paths']['generated_article_links']
+    output_file_path = os.path.join(folder_dir, f"links_{timestamp}.json")
+
+    # Ensure the directory exists
+    os.makedirs(folder_dir, exist_ok=True)
 
     # Save combined results to JSON file
     with open(output_file_path, 'w') as f:
         json.dump(combined_results, f, indent=4)
     st.info(f"Successfully saved links from {successful_count} portal(s) to file: {output_file_path}")
 
-    # Save links to article_links.txt
-    save_links_to_txt(combined_results)
+    # Save links to edited_link_file
+    save_links_to_txt(combined_results, config)
 
+def save_links_to_txt(combined_results, config):
+    """
+    Saves the article links to the edited_link_file from config.
 
-def save_links_to_txt(combined_results):
-    """Saves the article links to a text file."""
-    with open('sources/article_links.txt', 'w') as f:
-        for portal, articles in combined_results.items():
-            for article in articles:
-                url = article['url']
-                if is_valid_url(url):
+    Args:
+        combined_results (dict): Dictionary containing search results
+        config (dict): Configuration dictionary containing file paths
+    """
+    try:
+        # Get file path from config
+        if 'file_paths' not in config or 'edited_link_file' not in config['file_paths']:
+            raise KeyError("Missing required config paths: file_paths.edited_link_file")
+
+        filepath = config['file_paths']['edited_link_file']
+
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        # Read existing links to avoid duplicates
+        existing_links = set()
+        if os.path.exists(filepath):
+            with open(filepath, 'r') as f:
+                existing_links = set(f.read().splitlines())
+
+        # Collect all new valid URLs
+        new_urls = set()
+
+        # Handle different data structures in combined_results
+        if isinstance(combined_results, dict):
+            if 'search_results' in combined_results:
+                # Handle search results format
+                for item in combined_results['search_results']:
+                    if isinstance(item, dict):
+                        url = item.get('url')
+                    else:
+                        url = item
+                    if url and isinstance(url, str) and is_valid_url(url):
+                        new_urls.add(url)
+            else:
+                # Handle portal data format
+                for articles in combined_results.values():
+                    for article in articles:
+                        if isinstance(article, dict):
+                            url = article.get('url')
+                        else:
+                            url = article
+                        if url and isinstance(url, str) and is_valid_url(url):
+                            new_urls.add(url)
+
+        # Add only new URLs that don't exist in the file
+        new_urls = new_urls - existing_links
+
+        # Append new URLs to the file
+        if new_urls:
+            with open(filepath, 'a') as f:
+                for url in new_urls:
                     f.write(f"{url}\n")
 
-    st.info("Links have been written to sources/article_links.txt")
+            st.success(f"Added {len(new_urls)} new links to {filepath}")
+            logger.info(f"Successfully added {len(new_urls)} new links to {filepath}")
+        else:
+            st.info("No new links to add (all URLs already exist in the file)")
+            logger.info("No new links added - all URLs already exist in the file")
 
+    except KeyError as e:
+        error_msg = f"Configuration error: {str(e)}"
+        logger.error(error_msg)
+        st.error(error_msg)
+    except Exception as e:
+        error_msg = f"Error saving links to file: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        st.error(error_msg)
 
 def manage_link_content():
     """Handles the UI for managing link content."""
     with st.expander("📌 Manage Link Content", expanded=True):
-        tabs = st.tabs(["🔗 Manual Link Input", "🤖 Automated Link Generator"])
+        tabs = st.tabs(["🔗 Manual Link Input", "🤖 Automated Link Generator", "🔍 Add Links from Keywords"])  # New tab added
 
         with tabs[0]:
             link_content_manager()  # Call the link_content_manager function
 
         with tabs[1]:
             fetch_ai_news_links()
+
+        with tabs[2]:  # New tab for adding links from keywords
+            add_links_from_keywords()
+
+def add_links_from_keywords():
+    """Handles the UI for adding links based on user-defined keywords."""
+    st.header("🔍 Add Links from Keywords")
+
+    # Load configuration
+    config = load_config()
+    if not config:
+        st.error("Failed to load configuration")
+        return
+
+    keywords = st.text_input("Enter keywords (comma-separated):", help="Keywords to search for links.")
+    max_links = st.number_input("Max number of links to extract:", min_value=1, value=10, help="Set the maximum number of links to save.")
+    time_filter = st.selectbox(
+        "Time filter:",
+        options=['d', 'w', 'm', 'y'],
+        index=1,
+        format_func=lambda x: {
+            'd': 'Past 24 hours',
+            'w': 'Past week',
+            'm': 'Past month',
+            'y': 'Past year'
+        }[x],
+        help="Filter results by time"
+    )
+
+    if st.button("Search and Add Links"):
+        if keywords:
+            # Initialize SearchModule
+            search_module = SearchModule()
+            keyword_list = [keyword.strip() for keyword in keywords.split(',')]
+            all_links = []
+
+            with st.spinner("Searching for links..."):
+                for keyword in keyword_list:
+                    # Use the SearchModule's search_duckduckgo method
+                    search_results = search_module.search_duckduckgo(
+                        keywords=keyword,
+                        timelimit=time_filter,
+                        max_results=max_links
+                    )
+
+                    if search_results:
+                        # Filter relevant links using the module's method
+                        relevant_links = search_module.filter_relevant_links(
+                            search_results=search_results,
+                            keywords=[keyword]
+                        )
+                        all_links.extend(relevant_links)
+
+                # Remove duplicates while preserving order
+                all_links = list(dict.fromkeys(all_links))
+
+                # Limit the number of links to the user-defined maximum
+                all_links = all_links[:max_links]
+
+                if all_links:
+                    # Save the links using the configured file path
+                    save_links_to_txt({'search_results': [{'url': url} for url in all_links]}, config)
+                    st.success(f"Added {len(all_links)} new links!")
+
+                    # Display performance metrics
+                    metrics = search_module.get_performance_metrics()
+                    st.info(f"""
+                    Search Performance:
+                    - Search Duration: {metrics['search_duration']:.2f} seconds
+                    - Filter Duration: {metrics['filter_duration']:.2f} seconds
+                    - Relevance Rate: {metrics['relevance_rate']}%
+                    """)
+                else:
+                    st.warning("No relevant links found that meet the criteria.")
+        else:
+            st.warning("Please enter at least one keyword.")
+
+def save_links_to_txt(combined_results, config):
+    """
+    Saves the article links to a text file using the configured file path.
+
+    Args:
+        combined_results (dict): Dictionary containing search results
+        config (dict): Configuration dictionary containing file paths
+    """
+    try:
+        filepath = config['file_paths']['edited_link_file']
+
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        # Read existing links to avoid duplicates
+        existing_links = set()
+        if os.path.exists(filepath):
+            with open(filepath, 'r') as f:
+                existing_links = set(f.read().splitlines())
+
+        # Add new links
+        new_links_count = 0
+        with open(filepath, 'a') as f:
+            for portal_data in combined_results.values():
+                for article in portal_data:
+                    url = article['url']
+                    if url not in existing_links and is_valid_url(url):
+                        f.write(f"{url}\n")
+                        existing_links.add(url)
+                        new_links_count += 1
+
+        st.info(f"Added {new_links_count} new links to the configured file: {filepath}")
+
+        # Log the operation
+        logger.info(f"Successfully added {new_links_count} new links to {filepath}")
+
+    except KeyError as e:
+        error_msg = f"Missing configuration key: {str(e)}"
+        logger.error(error_msg)
+        st.error(error_msg)
+    except Exception as e:
+        error_msg = f"Error saving links to file: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        st.error(error_msg)
 
 
 def load_and_display_config():
@@ -572,6 +764,7 @@ def manage_prompt(config):
     else:
         prompt = load_main_prompt(config)
     return prompt
+
 
 
 def select_articles_to_process(config):

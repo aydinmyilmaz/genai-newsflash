@@ -4,7 +4,7 @@ You will be provided with a transcript from a YouTube video. Your task is to ana
 2. **Short Summary (100-300 words) 📄**
 3. **Main Takeaways or Key Points 🔑**
    - Create 4-7 bullet points summarizing the main takeaways or key points from the video.
-4. **Companies, Technologies, or Products Related to AI/ML 🏢💻**
+4. **Important Entities 🏢💻**
    - Identify any companies, technologies, or products related to generative AI, machine learning, AI innovations, and industry trends mentioned in the video.
 
 Focus only on content directly related to generative AI, machine learning, AI innovations, and industry trends. If the video is not primarily about AI/ML topics, summarize only the relevant sections. Avoid including any images, videos, or other media. Do not add any data from your own knowledge. If there is not enough text/data, simply state: "There is not enough extracted data."
@@ -35,8 +35,5 @@ Output the information in a structured text format suitable for incorporating in
 - ...
 
 
-###  Companies, Technologies, or Products Related to AI/ML 🏢💻
-
--  Company/Technology/Product 1: Details
--  Company/Technology/Product 2: Details
-- ...
+###  Imprtant Entities
+- Entity-1, Entity-2, ...

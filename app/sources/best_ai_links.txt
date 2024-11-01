@@ -6,3 +6,74 @@ https://newsletter.towardsai.net/archive?sort=new
 https://www.dailyzaps.com
 https://www.mindstream.news
 https://www.therundown.ai
+https://www.technologyreview.com/topic/artificial-intelligence/
+https://openai.com/blog/
+https://ai.googleblog.com/
+https://artificialintelligence-news.com/
+https://www.analyticsinsight.net/
+https://www.unite.ai
+https://bair.berkeley.edu/blog/
+https://hackernoon.com
+https://thegradient.pub
+https://siliconangle.com
+https://www.zdnet.com
+https://www.cbinsights.com/research/artificial-intelligence/
+https://blogs.nvidia.com/blog/category/generative-ai/
+https://syncedreview.com
+https://aibusiness.com
+https://openai.com/news/
+https://www.kdnuggets.com
+https://www.mckinsey.com/about-us/new-at-mckinsey-blog
+https://www.european-ai-alliance.eu/
+https://aiimpacts.org/
+https://www.japantimes.co.jp/tag/artificial-intelligence/
+https://www.chinadaily.com.cn/business/tech
+https://www.reuters.com/technology/artificial-intelligence/
+https://news.bensbites.com/newest
+https://www.theguardian.com/uk/technology
+https://arstechnica.com/tech-policy/
+https://cacm.acm.org/category/artificial-intelligence-machine-learning/
+https://newsletter.pragmaticengineer.com
+https://stealthoptional.com/news
+https://www.wired.co.uk/topic/artificial-intelligence
+https://www.european-ai-alliance.eu/
+https://www.itnews.com.au/category/artificial-intelligence
+https://www.zdnet.com.au/topic/artificial-intelligence/
+https://www.geeky-gadgets.com/category/artificial-intelligence/
+https://cohere.com/blog
+https://www.theinformation.com/articles/
+
+
+
+
+# Europe
+"https://aiimpacts.org/",
+"https://www.researchgate.net/topic/Artificial-Intelligence",
+
+# Asia
+"https://www.japantimes.co.jp/tag/artificial-intelligence/",
+"https://www.chinadaily.com.cn/business/tech/ai.html",
+"https://www.koreatimes.co.kr/www/nation/2023/10/356_348141.html",
+"https://www.thehindubusinessline.com/info-tech/artificial-intelligence/',
+
+# North America
+"https://www.scientificamerican.com/topic/artificial-intelligence/",
+"https://spectrum.ieee.org/artificial-intelligence",
+"https://www.dataversity.net/",
+"https://emerj.com/",
+
+# South America
+"https://www.telesurtv.net/tags/artificial-intelligence-en.html",
+"https://www.bbc.com/mundo/noticias-technology-64631155",
+
+# Africa
+"https://www.itweb.co.za/content/mG7pYVq7XKJ6BpV7",
+"https://www.techcentral.co.za/category/artificial-intelligence/",
+
+
+# General Global Sources
+"https://import.ai/",
+"https://aiwirex.com/",
+"https://futuretools.io/news",
+"https://towardsdatascience.com/",
+"https://towardsai.net/"
