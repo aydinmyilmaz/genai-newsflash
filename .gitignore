@@ -1,0 +1,51 @@
+# Node.js
+node_modules/
+npm-debug.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+*venv*
+*temp*
+*.venv*
+*.zip*
+*DS_Store*
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Other
+*.env
+*.local
+*temp*
+
+.DS_Store
+.venv/
+app.zip
+
+*output*
+*.venv*
+config.yml

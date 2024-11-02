@@ -30,3 +30,4 @@ youtube_transcript_api
 tiktoken
 matplotlib
 fpdf
+plotly

@@ -1,0 +1,202 @@
+# Adaptive Content Analysis System for AI/Tech Articles
+
+## Overview
+This system provides a structured approach to analyzing and summarizing technical content with adaptive scaling based on content length. It ensures consistent quality while maintaining appropriate depth for varying content sizes.
+
+## Content Classification System
+
+### Micro Content (<200 words)
+- Summary: 50-75 words
+- Key Points: 3-4 points
+- Tags: 2-3 tags
+- Implications: 2-3 points
+
+### Standard Content (200-800 words)
+- Summary: 100-150 words
+- Key Points: 4-6 points
+- Tags: 3-4 tags
+- Implications: 3-4 points
+
+### Long Content (800-2000 words)
+- Summary: 150-200 words
+- Key Points: 6-8 points
+- Tags: 4-5 tags
+- Implications: 4-5 points
+
+### Extended Content (>2000 words)
+- Summary: 200-250 words
+- Key Points: 8-10 points
+- Tags: 5 tags
+- Implications: 5-6 points
+
+## Analysis Components
+
+### Initial Assessment Protocol
+1. Calculate approximate word count of input text
+2. Determine content category (Micro/Standard/Long/Extended)
+3. Apply corresponding scaling parameters
+4. Verify information density supports target output
+
+### Core Components
+
+#### 1. Date of Article 📅
+- Extract date if mentioned in text
+- Format: YYYY-MM-DD
+- If no date, mark as [Date not specified]
+
+#### 2. Title 🛣️
+- Extract exact title from content
+- If no clear title exists, synthesize one and mark with asterisk (*)
+- Keep under 120 characters
+- Include key topic indicators
+
+#### 3. Tags 🏷️
+##### Guidelines for Tag Generation:
+- Relevance: Direct relation to main topics
+- Specificity: Use precise rather than general tags
+- Consistency: Maintain uniform tagging system
+- Format: lowercase with hyphens (e.g., machine-learning)
+
+##### Scaling Rules:
+- Micro: 2-3 fundamental tags
+- Standard: 3-4 balanced tags
+- Long: 4-5 detailed tags
+- Extended: 5 comprehensive tags
+
+#### 4. Summary 📝
+##### Length Scaling:
+- Micro: 50-75 words (core message)
+- Standard: 100-150 words (context + key developments)
+- Long: 150-200 words (industry context + implications)
+- Extended: 200-250 words (market context + future impact)
+
+##### Summary Guidelines:
+- Begin with context setting
+- Highlight key developments
+- Explain cross-domain implications
+- Conclude with impact assessment
+- Use domain-appropriate terminology
+- Maintain narrative flow
+
+#### 5. Key Points 🔑
+##### Scaling Depth:
+- Micro: Basic facts (3-4 points)
+- Standard: Facts with context (4-6 points)
+- Long: Detailed analysis (6-8 points)
+- Extended: Comprehensive coverage (8-10 points)
+
+##### Point Construction Rules:
+- Clear, concise statements
+- Include quantifiable data when available
+- Link to broader industry context
+- Avoid redundancy
+- Progressive detail depth
+
+#### 6. Implications and Industry Trends 🌐
+##### Categories to Cover:
+- Technical Implications
+- Business Impact
+- Market Trends
+- Challenges
+- Opportunities
+- Future Developments
+
+##### Scaling Structure:
+- Micro: 2-3 core implications
+- Standard: 3-4 balanced implications
+- Long: 4-5 detailed implications
+- Extended: 5-6 comprehensive implications
+
+#### 7. Intended Audience 👥
+##### Audience Scaling:
+- Micro: 1-2 broad categories
+- Standard: 2-3 specific categories
+- Long: 3-4 detailed categories
+- Extended: 4-5 precise categories
+
+#### 8. URL 🌐
+- Include full URL if available
+- Format as clickable link when possible
+
+## Output Template
+
+```markdown
+📊 Content Category: [Micro/Standard/Long/Extended]
+Word Count: [approximate number]
+
+📅 Date of Article: [YYYY-MM-DD]
+
+🛣️ Title: [Extracted or Synthesized Title]
+
+🏷️ Tags: [tag1], [tag2], [tag3]
+
+📝 Summary
+[Length-appropriate summary based on content category]
+
+🔑 Key Points
+• [Point 1]
+• [Point 2]
+• [Point 3]
+[...]
+
+📈 Implications and Industry Trends
+• [Implication 1]
+• [Implication 2]
+[...]
+
+👥 Intended Audience
+• [Audience Category 1]
+• [Audience Category 2]
+[...]
+
+🌐 URL: [Full URL if available]
+```
+
+## Quality Control Checklist
+
+### Pre-Analysis
+- [ ] Verify content is AI/tech related
+- [ ] Calculate word count
+- [ ] Determine appropriate category
+- [ ] Check information density
+
+### During Analysis
+- [ ] Maintain consistent depth-to-length ratio
+- [ ] Ensure proper scaling of each section
+- [ ] Verify technical accuracy
+- [ ] Check for redundancy
+
+### Post-Analysis
+- [ ] Verify output meets length requirements
+- [ ] Check for section completeness
+- [ ] Validate tag relevance and format
+- [ ] Review audience appropriateness
+
+### Edge Cases
+- Very short content (<100 words): Focus on core message only
+- Mixed content: Extract only AI/tech relevant portions
+- Technical deep-dives: Maintain accessibility while preserving technical accuracy
+- News aggregations: Treat each major point as separate micro-content
+
+## Notes for Implementation
+
+### Best Practices
+1. Always indicate content category and word count
+2. Scale detail level proportionally
+3. Maintain consistent formatting
+4. Flag insufficient information
+5. Preserve technical accuracy while ensuring readability
+
+### Common Pitfalls to Avoid
+1. Over-extending short content
+2. Oversimplifying complex topics
+3. Inconsistent tag formatting
+4. Redundant information across sections
+5. Mismatched audience targeting
+
+### Adaptation Guidelines
+1. Adjust scaling parameters based on content type
+2. Modify output format for specific platforms
+3. Update tag categories as technology evolves
+4. Refine audience categories based on usage
+5. Calibrate length requirements per use case

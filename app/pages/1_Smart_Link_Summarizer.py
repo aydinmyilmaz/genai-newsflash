@@ -2,16 +2,22 @@
 import streamlit as st
 import json
 import os
-from modules.smart_graph_scraper import smart_graph_scrap, load_config
-from modules.link_content_manager import link_content_manager
-from modules.view_link_summaries import view_link_summaries
+
 import tempfile
 import logging
 from datetime import datetime
 import time
 import hashlib
 from docx import Document # Import the search function
-from modules.search_filter import SearchModule
+
+from modules.searcher.search_filter import SearchModule
+from modules.mongodb_manager.mongo_summary_handler import SummaryMongoHandler
+from modules.utils.helpers import auth_check
+
+from modules.scraper.smart_graph_scraper import smart_graph_scrap, load_config
+
+from modules.utils.link_content_manager import link_content_manager
+from modules.utils.article_summary_exporter import view_export_article_summaries
 # Set page configuration at the top
 st.set_page_config(layout="wide", page_title="Smart Link Summarizer")
 
@@ -20,14 +26,14 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Add custom CSS for styling
+# Add custom CSS for styling - moved near the top for cleaner organization
 st.markdown(
     """
     <style>
     .stButton > button {
-        background-color: #007BFF; /* Blue */
+        background-color: #007BFF;
         color: white;
-        border: 2px solid #007BFF; /* Blue border */
+        border: 2px solid #007BFF;
         padding: 10px 20px;
         text-align: center;
         text-decoration: none;
@@ -39,31 +45,41 @@ st.markdown(
         transition: background-color 0.3s, border-color 0.3s, color 0.3s;
     }
     .stButton > button:hover {
-        background-color: #0056b3; /* Darker blue */
-        border-color: #0056b3; /* Darker blue border */
-        color: white; /* Keep text white on hover */
+        background-color: #0056b3;
+        border-color: #0056b3;
+        color: white;
     }
     .stButton > button:focus {
-        outline: none; /* Remove default focus outline */
-        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Add a blue shadow on focus */
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
     }
     .stTextInput input, .stTextArea textarea {
-        border: 2px solid #007BFF; /* Blue */
+        border: 2px solid #007BFF;
         border-radius: 5px;
     }
     .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: #0056b3; /* Darker blue */
+        border-color: #0056b3;
     }
     .stCheckbox > label {
-        color: #007BFF; /* Blue */
+        color: #007BFF;
     }
     .stMarkdown {
-        color: #333; /* Dark gray */
+        color: #333;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# Authentication check at the start
+auth_check()
+# Get current user's email from session state
+user_email = st.session_state.user_email
+
+# Set up logging
+logging.basicConfig(level=logging.INFO,
+                   format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s')
+logger = logging.getLogger(__name__)
 
 def tooltip(text, help_text):
     """
@@ -595,7 +611,7 @@ def save_links_to_txt(combined_results, config):
 
 def manage_link_content():
     """Handles the UI for managing link content."""
-    with st.expander("📌 Manage Link Content", expanded=True):
+    with st.expander("📌 Manage Link Generation", expanded=True):
         tabs = st.tabs(["🔗 Manual Link Input", "🤖 Automated Link Generator", "🔍 Add Links from Keywords"])  # New tab added
 
         with tabs[0]:
@@ -808,27 +824,61 @@ def handle_processing_results(results, config, total_duration):
     st.session_state.json_file_path = json_file_path
     st.session_state.total_duration = total_duration
 
-    st.success(f"✅ Processing completed successfully! Results saved to {json_file_path}")
-    st.info(f"⏱ Total processing time: {total_duration:.2f} seconds")
+    # Save to MongoDB automatically
+    try:
+        # Initialize MongoDB handler
+        mongo_handler = SummaryMongoHandler()
 
-    # Save results as .docx
-    docx_file_path = save_results_to_docx(results)
-    if docx_file_path:
-        # Store the path of the last saved .docx file in session state
-        st.session_state.docx_file_path = docx_file_path
-        st.success(f"✅ .docx file saved successfully at {docx_file_path}")  # Confirm file creation
-    else:
-        st.error("❌ Failed to save .docx file.")
+        # Get user email from session state if available
+        user_email = st.session_state.get('user_email')
+
+        if user_email:
+            # Save to MongoDB
+            logger.info(f"Attempting to save to MongoDB: {results}")
+            valid_results = [result for result in results if 'error' not in result]
+
+            if valid_results:
+                save_result = mongo_handler.save_summaries_to_mongo(valid_results, user_email)
+                logger.info(f"Save result: {save_result}")
+                if save_result["success"]:
+                    st.success(f"Saved {save_result['saved_count']} valid articles to MongoDB")
+                else:
+                    st.error(f"Error saving to MongoDB: {save_result.get('error', 'Unknown error')}")
+            else:
+                st.warning("No valid results to save to MongoDB.")
 
 
-def view_article_summaries():
+            if save_result["success"]:
+                st.success(f"""✅ Results saved:
+                - Local JSON: {json_file_path}
+                - MongoDB: {save_result['saved_count']} new articles, {save_result['skipped_count']} existing articles
+                - Processing time: {total_duration:.2f} seconds""")
+            else:
+                st.error(f"❌ MongoDB save failed: {save_result.get('error', 'Unknown error')}")
+                st.success(f"✅ Results saved to local JSON: {json_file_path}")
+                st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
+        else:
+            st.warning("⚠️ Results saved locally only. Log in to save to MongoDB.")
+            st.success(f"✅ Results saved to local JSON: {json_file_path}")
+            st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
+
+    except Exception as e:
+        logger.error(f"MongoDB save error: {str(e)}", exc_info=True)
+        st.error("❌ Error saving to MongoDB. Results saved locally only.")
+        st.success(f"✅ Results saved to local JSON: {json_file_path}")
+        st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
+
+def view_and_export_article_summaries():
     """Displays the summaries of processed articles."""
-    with st.expander("📄 View Article Summaries", expanded=False):
-        view_link_summaries()  # Call the function to display article summaries
+    with st.expander("📄 View Summaries", expanded=False):
+        view_export_article_summaries()  # Call the function to display article summaries
 
 
 def main():
     st.title("🔍 Smart Article-Link Summarizer")
+
+    # Display welcome message with user email
+    st.markdown(f"Welcome, **{user_email}**! 👋")
 
     # Link content management
     manage_link_content()
@@ -840,7 +890,7 @@ def main():
     process_links(config)
 
     # View article summaries
-    view_article_summaries()
+    view_and_export_article_summaries()
 
 if __name__ == "__main__":
     main()

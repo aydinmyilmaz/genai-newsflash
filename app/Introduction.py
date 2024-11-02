@@ -1,15 +1,21 @@
 import streamlit as st
 import yaml
-from modules.helpers import update_config
+from modules.utils.helpers import update_config
+from modules.utils.user_auth import UserAuth
+from modules.utils.helpers import auth_check
 
 # Set the page title and icon
 st.set_page_config(page_title="Smart Newsflash", page_icon="📰")
+
+# Initialize and render authentication
+auth = UserAuth()
+auth.render_auth_ui(location="sidebar")
 
 
 # Main heading
 st.title("Welcome to Smart Newsflash 📰")
 
-st.subheader("Configurations")
+auth_check()
 
 # Call the update_config function
 update_config()
