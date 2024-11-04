@@ -19,6 +19,7 @@ file_handler = logging.FileHandler('app.log')
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 logger.addHandler(file_handler)
 
+
 def file_editor(tab_title, file_path):
     with st.container():
         st.subheader(f"Edit {tab_title}")
@@ -55,6 +56,7 @@ def display_file_content(file_path):
     st.text_area("File Content:", value=content, height=200, disabled=True)
     logger.debug(f"Displayed content of {file_path}")
 
+
 def display_links_as_strings(file_path):
     """Display links as strings, not clickable links."""
     data = load_json(file_path)
@@ -90,15 +92,8 @@ def link_content_manager():
     search_result_path = link_file_path  # Using the corrected variable
 
     file_editor("Link File", link_path)
-    # Create tabs instead of expanders
-    tabs = st.tabs(["🔗 View Links Details", "📋 View Link File Content"])
-
-    with tabs[0]:
-        display_links_as_strings(search_result_path)
-
-    with tabs[1]:
-        if st.button("🔍 Show Link Content"):
-            display_file_content(link_path)
+    if st.checkbox("🔍 Show Link Content"):
+        display_file_content(link_path)
 
 
 if __name__ == '__main__':

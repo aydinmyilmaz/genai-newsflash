@@ -4,7 +4,6 @@ https://www.theverge.com/ai-artificial-intelligence
 https://venturebeat.com/category/ai/
 https://newsletter.towardsai.net/archive?sort=new
 https://www.dailyzaps.com
-https://www.mindstream.news
 https://www.therundown.ai
 https://www.technologyreview.com/topic/artificial-intelligence/
 https://openai.com/blog/
@@ -27,7 +26,6 @@ https://www.mckinsey.com/about-us/new-at-mckinsey-blog
 https://www.european-ai-alliance.eu/
 https://aiimpacts.org/
 https://www.japantimes.co.jp/tag/artificial-intelligence/
-https://www.chinadaily.com.cn/business/tech
 https://www.reuters.com/technology/artificial-intelligence/
 https://news.bensbites.com/newest
 https://www.theguardian.com/uk/technology
@@ -42,9 +40,8 @@ https://www.zdnet.com.au/topic/artificial-intelligence/
 https://www.geeky-gadgets.com/category/artificial-intelligence/
 https://cohere.com/blog
 https://www.theinformation.com/articles/
-
-
-
+https://www.thehindubusinessline.com/info-tech/artificial-intelligence/
+https://towardsai.net/p
 
 # Europe
 "https://aiimpacts.org/",

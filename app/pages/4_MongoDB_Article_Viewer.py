@@ -34,11 +34,11 @@ def initialize_session_state():
 def display_article(article: dict, db_manager:  MongoDBQueryManager, index: int):
     """Display single article in an expander"""
     try:
-        with st.expander(f"📄 {article['metadata']['title']}", expanded=False):
-            summary = db_manager.format_article_summary(article)
-            st.write(summary)
-            st.write(f"Processing Date: {article['metadata']['processing_date']}")
-            st.write(f"URL: {article['metadata']['url']}")
+        if article['_id'] != '672567c9e94cc9ca904d1f27':
+            with st.expander(f"📄 {article['metadata']['title']}", expanded=False):
+                summary = db_manager.format_article_summary(article)
+                st.write(summary)
+
     except Exception as e:
         logger.error(f"Error displaying article: {str(e)}", exc_info=True)
         st.error(f"Error displaying article {index}")

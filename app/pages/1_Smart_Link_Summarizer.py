@@ -81,6 +81,7 @@ logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s')
 logger = logging.getLogger(__name__)
 
+
 def tooltip(text, help_text):
     """
     Returns a tooltip HTML string for the given text and help text.
@@ -93,6 +94,7 @@ def tooltip(text, help_text):
         str: The HTML string with the tooltip.
     """
     return f'<span title="{help_text}">{text}</span>'
+
 
 def display_links_selection(config):
     """
@@ -113,6 +115,7 @@ def display_links_selection(config):
         return []
 
     return urls
+
 
 def save_results_to_file(results, config):
     """
@@ -141,6 +144,7 @@ def save_results_to_file(results, config):
 
     return file_path
 
+
 def save_results_to_docx(results):
     """
     Saves the processed results to a DOCX file with a timestamp.
@@ -166,6 +170,7 @@ def save_results_to_docx(results):
 
     doc.save(file_path)
     return file_path
+
 
 def cached_process_url(url, config, prompt):
     """
@@ -204,46 +209,74 @@ def cached_process_url(url, config, prompt):
     finally:
         logger.info(f"Finished processing URL: {url}")
 
+
 def process_urls(urls, config, prompt):
     """
     Processes a list of URLs and returns the results.
-
-    Args:
-        urls (list): List of URLs to process.
-        config (dict): The configuration dictionary.
-        prompt (str): The prompt to use during processing.
-
-    Returns:
-        tuple: List of processed results and total duration of processing.
     """
     results = []
+    skipped_results = []  # Add this to track skipped articles
     start_time = time.time()
 
     # Create a progress bar
     progress_bar = st.progress(0)
     status_text = st.empty()
 
-    for i, url in enumerate(urls, 1):
+    # Initialize MongoDB handler
+    mongo_handler = SummaryMongoHandler()
+
+    # Filter out already processed URLs
+    urls_to_process = []
+    skipped_urls = []
+
+    for url in urls:
+        if mongo_handler.check_article_exists(url):
+            skipped_urls.append(url)
+            # Add skipped article to results with a skip flag
+            skipped_results.append({
+                "url": url,
+                "skipped": True  # Add flag to indicate this was skipped
+            })
+        else:
+            urls_to_process.append(url)
+
+    # Show status of skipped URLs
+    if skipped_urls:
+        st.info(f"Skipping {len(skipped_urls)} already processed articles")
+        logger.info(f"Skipping {len(skipped_urls)} already processed articles")
+
+    # If no URLs to process, return early with skipped results
+    if not urls_to_process:
+        end_time = time.time()
+        total_duration = end_time - start_time
+        status_text.text("No new articles to process")
+        return skipped_results, total_duration  # Return skipped results
+
+    # Process remaining URLs
+    for i, url in enumerate(urls_to_process, 1):
         url_start_time = time.time()
-        status_text.text(f"Processing URL {i}/{len(urls)}: {url}")
+        status_text.text(f"Processing URL {i}/{len(urls_to_process)}: {url}")
 
         result = cached_process_url(url, config, prompt)
         if isinstance(result, dict):
-            results.append(result)  # Append the result as a new dictionary in the list
+            results.append(result)
 
         url_end_time = time.time()
         url_duration = url_end_time - url_start_time
-        logger.info(f"Finished processing URL {i}/{len(urls)} in {url_duration:.2f} seconds")
+        logger.info(f"Finished processing URL {i}/{len(urls_to_process)} in {url_duration:.2f} seconds")
 
         # Update progress bar
-        progress_bar.progress(i / len(urls))
+        progress_bar.progress(i / len(urls_to_process))
 
     end_time = time.time()
     total_duration = end_time - start_time
     logger.info(f"Total processing time: {total_duration:.2f} seconds")
     status_text.text(f"Processing completed in {total_duration:.2f} seconds")
 
-    return results, total_duration
+    # Combine processed and skipped results
+    all_results = results + skipped_results
+    return all_results, total_duration
+
 
 def load_prompts(prompt_folder):
     """
@@ -261,6 +294,7 @@ def load_prompts(prompt_folder):
             with open(os.path.join(prompt_folder, filename), 'r') as f:
                 prompts[filename] = f.read().strip()
     return prompts
+
 
 def load_main_prompt(config):
     """
@@ -366,6 +400,7 @@ def save_prompt_to_file(file_path, content):
     with open(file_path, 'w') as f:
         f.write(content)
 
+
 def display_article_details(results):
     """
     Displays the details of a selected article.
@@ -399,6 +434,7 @@ def display_article_details(results):
                         st.write(f"**{key.replace('_', ' ').title()}:** {value}")
         else:
             st.error("Selected article data is not available.")
+
 
 def is_valid_url(url):
     # List of file extensions to exclude
@@ -473,18 +509,22 @@ def fetch_and_process_links(urls, n_value):
     combined_results = {}
     successful_count = 0
 
+    latest_success_message = None
     for i, url in enumerate(urls):
         try:
             result = process_single_url(url, prompt, n_value)
             if result:
                 # Merge the result into combined_results
                 combined_results = merge_results(combined_results, result, n_value)
-                st.success(f"Links from URL {i + 1} processed successfully.")
+                latest_success_message = f"Links from URL {i + 1} processed successfully."
                 successful_count += 1
             else:
                 st.warning(f"No links found for URL {i + 1}: {url}")
         except Exception as e:
             st.error(f"Error processing URL {i + 1}: {url}. Error: {e}")
+
+    if latest_success_message:
+        st.success(latest_success_message)
 
     return combined_results, successful_count
 
@@ -518,6 +558,7 @@ def merge_results(combined_results, result, n_value):
 
     return combined_results
 
+
 def save_combined_results(combined_results, successful_count, config):
     """Saves the combined results to JSON and text files."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -535,6 +576,7 @@ def save_combined_results(combined_results, successful_count, config):
 
     # Save links to edited_link_file
     save_links_to_txt(combined_results, config)
+
 
 def save_links_to_txt(combined_results, config):
     """
@@ -609,19 +651,287 @@ def save_links_to_txt(combined_results, config):
         logger.error(error_msg, exc_info=True)
         st.error(error_msg)
 
+
+# def manage_link_content():
+#     """Handles the UI for managing link content."""
+#     with st.expander("📌 Manage Link Generation", expanded=True):
+#         tabs = st.tabs(["🔗 Manual Link Input", "🤖 Automated Link Generator", "🔍 Add Links from Keywords"])  # New tab added
+
+#         with tabs[0]:
+#             link_content_manager()  # Call the link_content_manager function
+
+#         with tabs[1]:
+#             fetch_ai_news_links()
+
+#         with tabs[2]:  # New tab for adding links from keywords
+#             add_links_from_keywords()
+
 def manage_link_content():
-    """Handles the UI for managing link content."""
+    """Enhanced UI for managing link content while maintaining all functionality."""
+
+    st.markdown("""
+        <style>
+        /* Enhanced Tab Styling */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            background-color: transparent;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+        .stTabs [aria-selected="true"] {
+            background-color: #007bff !important;
+            color: white !important;
+            border-color: #007bff !important;
+            border-radius: 6px !important;
+        }
+
+        /* Button Enhancements */
+        .stButton button {
+            width: 100%;
+            margin-top: 10px;
+            height: 45px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 2px solid #007bff;
+        }
+
+        .stButton button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Input Field Styling */
+        .stTextInput input, .stTextArea textarea {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .stTextInput input:focus, .stTextArea textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+
+        /* Info Box Styling */
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 12px 16px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        /* Helper Text Styling */
+        .helper-text {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        /* Section Headers */
+        h3 {
+            color: #2c3e50;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        /* Alert/Info Message Styling */
+        .stAlert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        /* Progress Bar Enhancement */
+        .stProgress > div > div {
+            background-color: #007bff;
+        }
+
+        /* Expander Styling */
+        .streamlit-expanderHeader {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: 500;
+        }
+
+        /* Metrics Styling */
+        [data-testid="stMetricValue"] {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #007bff;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     with st.expander("📌 Manage Link Generation", expanded=True):
-        tabs = st.tabs(["🔗 Manual Link Input", "🤖 Automated Link Generator", "🔍 Add Links from Keywords"])  # New tab added
+        # Enhanced top-level helper text
+        st.markdown("""
+            <div class='helper-text'>
+            <b>Choose your preferred method:</b><br>
+            🔸 <b>Manual:</b> Directly paste your links<br>
+            🔸 <b>Automated:</b> Generate links from news sources<br>
+            🔸 <b>Keywords:</b> Find links based on search terms
+            </div>
+        """, unsafe_allow_html=True)
+
+        tabs = st.tabs([
+            "🔗 Manual Link Input",
+            "🤖 Automated Link Generator",
+            "🔍 Add Links from Keywords"
+        ])
 
         with tabs[0]:
-            link_content_manager()  # Call the link_content_manager function
+            st.markdown("### Manual Link Input")
+            st.markdown("""
+                <div class='info-box'>
+                📝 <b>Instructions:</b><br>
+                • Paste your links below (one per line)<br>
+                • Links will be validated automatically<br>
+                • Supported: News articles, blog posts, and web pages
+                </div>
+            """, unsafe_allow_html=True)
+
+            link_content_manager()
 
         with tabs[1]:
+            st.markdown("### Automated Link Generator")
+            st.markdown("""
+                <div class='info-box'>
+                🤖 <b>How it works:</b><br>
+                1. Enter source URLs below<br>
+                2. Set the number of links to generate<br>
+                3. Click Generate to start the process
+                </div>
+            """, unsafe_allow_html=True)
+
             fetch_ai_news_links()
 
-        with tabs[2]:  # New tab for adding links from keywords
-            add_links_from_keywords()
+        with tabs[2]:
+            st.markdown("### Keyword-Based Search")
+            st.markdown("""
+                <div class='info-box'>
+                🔍 <b>Search options:</b><br>
+                • Enter keywords separated by commas<br>
+                • Adjust the maximum results count<br>
+                • Select your preferred time range
+                </div>
+            """, unsafe_allow_html=True)
+
+            config = load_config()
+            if not config:
+                st.error("⚠️ Configuration loading failed")
+                return
+
+            col1, col2 = st.columns([2, 1])
+
+            with col1:
+                keywords = st.text_input(
+                    "Keywords (comma-separated)",
+                    help="Example: AI technology, machine learning, data science"
+                )
+
+            with col2:
+                max_links = st.number_input(
+                    "Max results",
+                    min_value=1,
+                    max_value=50,
+                    value=10,
+                    help="Maximum number of links to retrieve"
+                )
+
+            time_filter = st.select_slider(
+                "Time range",
+                options=['d', 'w', 'm', 'y'],
+                value='w',
+                format_func=lambda x: {
+                    'd': 'Last 24 hours',
+                    'w': 'Past week',
+                    'm': 'Past month',
+                    'y': 'Past year'
+                }[x]
+            )
+
+            if st.button("🔎 Search and Add Links", use_container_width=True):
+                if not keywords.strip():
+                    st.warning("⚠️ Please enter at least one keyword")
+                    return
+
+                with st.spinner("🔍 Searching for relevant links..."):
+                    process_keyword_search(keywords, max_links, time_filter, config)
+
+def process_keyword_search(keywords, max_links, time_filter, config):
+    """Enhanced keyword search processing with better feedback"""
+    try:
+        search_module = SearchModule()
+        keyword_list = [k.strip() for k in keywords.split(',')]
+
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
+        all_links = []
+        for idx, keyword in enumerate(keyword_list):
+            status_text.text(f"Searching for: {keyword}")
+            progress_bar.progress((idx + 1) / len(keyword_list))
+
+            results = search_module.search_duckduckgo(
+                keywords=keyword,
+                timelimit=time_filter,
+                max_results=max_links
+            )
+
+            if results:
+                relevant_links = search_module.filter_relevant_links(
+                    search_results=results,
+                    keywords=[keyword]
+                )
+                all_links.extend(relevant_links)
+
+        # Remove duplicates while preserving order
+        all_links = list(dict.fromkeys(all_links))[:max_links]
+
+        if all_links:
+            save_links_to_txt({'search_results': [{'url': url} for url in all_links]}, config)
+
+            # Show results summary
+            st.success(f"✅ Successfully added {len(all_links)} new links!")
+
+            # Display metrics in a more visual way
+            metrics = search_module.get_performance_metrics()
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Search Time", f"{metrics['search_duration']:.1f}s")
+            with col2:
+                st.metric("Filter Time", f"{metrics['filter_duration']:.1f}s")
+            with col3:
+                st.metric("Relevance", f"{metrics['relevance_rate']}%")
+
+            # Show found links in an expandable section
+            with st.expander("📋 View Found Links"):
+                for link in all_links:
+                    st.write(f"• {link}")
+        else:
+            st.warning("No relevant links found matching your criteria")
+
+    except Exception as e:
+        st.error(f"Error during search: {str(e)}")
+        logger.error(f"Search error: {str(e)}", exc_info=True)
 
 def add_links_from_keywords():
     """Handles the UI for adding links based on user-defined keywords."""
@@ -695,6 +1005,7 @@ def add_links_from_keywords():
                     st.warning("No relevant links found that meet the criteria.")
         else:
             st.warning("Please enter at least one keyword.")
+
 
 def save_links_to_txt(combined_results, config):
     """
@@ -815,48 +1126,48 @@ def process_selected_articles(selected_urls, config, prompt):
 
 
 def handle_processing_results(results, config, total_duration):
-    """Saves and displays the results of the processed articles."""
+    """
+    Saves and displays the results of the processed articles.
+    """
+    # Filter out skipped articles for file saving
+    results_to_save = [r for r in results if not r.get('skipped', False)]
+
     # Save results to file
-    json_file_path = save_results_to_file(results, config)
+    json_file_path = save_results_to_file(results_to_save, config)
 
     # Store results and file_path in session state
     st.session_state.results = results
     st.session_state.json_file_path = json_file_path
     st.session_state.total_duration = total_duration
 
-    # Save to MongoDB automatically
+    # Count skipped articles
+    skipped_count = sum(1 for r in results if r.get('skipped', False))
+
     try:
         # Initialize MongoDB handler
         mongo_handler = SummaryMongoHandler()
-
-        # Get user email from session state if available
         user_email = st.session_state.get('user_email')
 
         if user_email:
-            # Save to MongoDB
-            logger.info(f"Attempting to save to MongoDB: {results}")
-            valid_results = [result for result in results if 'error' not in result]
+            # Save to MongoDB (only non-skipped results)
+            valid_results = [r for r in results_to_save if 'error' not in r]
 
             if valid_results:
                 save_result = mongo_handler.save_summaries_to_mongo(valid_results, user_email)
                 logger.info(f"Save result: {save_result}")
+
                 if save_result["success"]:
-                    st.success(f"Saved {save_result['saved_count']} valid articles to MongoDB")
+                    st.success(f"""✅ Results saved:
+                    - Local JSON: {json_file_path}
+                    - MongoDB: {save_result['saved_count']} new articles
+                    - Skipped: {skipped_count} already existing articles
+                    - Processing time: {total_duration:.2f} seconds""")
                 else:
-                    st.error(f"Error saving to MongoDB: {save_result.get('error', 'Unknown error')}")
+                    st.error(f"❌ MongoDB save failed: {save_result.get('error', 'Unknown error')}")
+                    st.success(f"✅ Results saved to local JSON: {json_file_path}")
+                    st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
             else:
-                st.warning("No valid results to save to MongoDB.")
-
-
-            if save_result["success"]:
-                st.success(f"""✅ Results saved:
-                - Local JSON: {json_file_path}
-                - MongoDB: {save_result['saved_count']} new articles, {save_result['skipped_count']} existing articles
-                - Processing time: {total_duration:.2f} seconds""")
-            else:
-                st.error(f"❌ MongoDB save failed: {save_result.get('error', 'Unknown error')}")
-                st.success(f"✅ Results saved to local JSON: {json_file_path}")
-                st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
+                st.warning(f"No new articles to save. {skipped_count} articles were already processed.")
         else:
             st.warning("⚠️ Results saved locally only. Log in to save to MongoDB.")
             st.success(f"✅ Results saved to local JSON: {json_file_path}")
@@ -867,6 +1178,7 @@ def handle_processing_results(results, config, total_duration):
         st.error("❌ Error saving to MongoDB. Results saved locally only.")
         st.success(f"✅ Results saved to local JSON: {json_file_path}")
         st.info(f"⏱ Processing time: {total_duration:.2f} seconds")
+
 
 def view_and_export_article_summaries():
     """Displays the summaries of processed articles."""

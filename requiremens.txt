@@ -31,3 +31,4 @@ tiktoken
 matplotlib
 fpdf
 plotly
+wordcloud

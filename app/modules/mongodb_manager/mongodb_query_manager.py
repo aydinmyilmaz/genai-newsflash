@@ -345,107 +345,92 @@ class MongoDBQueryManager:
 
     def format_article_summary(self, article: Dict) -> str:
         """
-        Format article summary with proper date handling for both legacy and new JSON schema formats.
-        Uses flexible key matching to handle variations in key names.
+        Format article summary preserving markdown headers and emojis from the summary text,
+        replace title and date with metadata values, and append the article ID and source.
 
         Args:
-            article (Dict): Article dictionary in either legacy or new JSON schema format
-
+            article (Dict): Article dictionary containing summary information and _id
         Returns:
-            str: Formatted article summary
+            str: Formatted article summary with preserved markdown formatting, emojis, and ID
         """
         try:
             if not article:
                 return "Summary not available"
 
-            # Helper function to find keys flexibly
-            def find_key(search_terms: list, dict_keys: list) -> str:
-                """Find the first key that contains any of the search terms"""
-                for key in dict_keys:
-                    if any(term.lower() in key.lower() for term in search_terms):
-                        return key
-                return None
+            formatted_text = ""
 
-            # Check if it's new format by looking for date or emoji indicators
-            article_keys = article.keys()
-            date_key = find_key(['date', '📅'], article_keys)
+            # Get the summary text if available
+            summary = article.get('summary', {})
+            if isinstance(summary, dict) and 'text' in summary:
+                # First replace ### with ##### for consistent header levels
+                formatted_text = summary['text'].replace("###", "#####").replace('"', '')
 
-            if date_key:  # New JSON schema format
-                formatted_sections = []
+                # Get metadata values
+                metadata = article.get('metadata', {})
+                metadata_title = metadata.get('title', 'Title not available')
 
-                # Add Date
-                if date_key:
-                    formatted_sections.append(f"### Date of Article 📅\n{article[date_key]}")
+                # Format the date from metadata
+                published_date = metadata.get('published_date')
+                if published_date:
+                    try:
+                        from datetime import datetime
+                        # Try different date formats
+                        date_formats = [
+                            "%Y-%m-%dT%H:%M:%S%z",  # 2024-10-15T22:58:44+00:00
+                            "%b %d, %Y",            # Oct 30, 2024
+                            "%Y-%m-%d"              # 2024-11-02
+                        ]
 
-                # Add Title
-                title_key = find_key(['title', '🛣️'], article_keys)
-                if title_key:
-                    formatted_sections.append(f"### Title 🛣️\n{article[title_key]}")
+                        parsed_date = None
+                        for date_format in date_formats:
+                            try:
+                                # Remove any trailing decimals in timestamp if present
+                                if '+' in published_date and '.' in published_date:
+                                    published_date = published_date.split('.')[0] + '+00:00'
+                                parsed_date = datetime.strptime(published_date, date_format)
+                                break
+                            except ValueError:
+                                continue
 
-                # Add Summary
-                summary_key = find_key(['summary', '📝'], article_keys)
-                if summary_key:
-                    formatted_sections.append(f"### Summary 📝\n{article[summary_key]}")
-
-                # Add Key Points
-                points_key = find_key(['key points', 'points', '🔑'], article_keys)
-                if points_key and article[points_key]:
-                    points = article[points_key]
-                    if isinstance(points, list):
-                        points_text = '\n'.join([f"- {point}" for point in points])
-                    else:
-                        points_text = points
-                    formatted_sections.append(f"### Key Points 🔑\n{points_text}")
-
-                # Add Implications
-                implications_key = find_key(['implications', 'trends', '📈'], article_keys)
-                if implications_key and article[implications_key]:
-                    implications = article[implications_key]
-                    if isinstance(implications, list):
-                        implications_text = '\n'.join([f"- {imp}" for imp in implications])
-                    else:
-                        implications_text = implications
-                    formatted_sections.append(f"### Implications 📈\n{implications_text}")
-
-                # Add Intended Audience
-                audience_key = find_key(['audience', '👥'], article_keys)
-                if audience_key and article[audience_key]:
-                    audience = article[audience_key]
-                    if isinstance(audience, list):
-                        audience_text = '\n'.join([f"- {aud}" for aud in audience])
-                    else:
-                        audience_text = audience
-                    formatted_sections.append(f"### Intended Audience 👥\n{audience_text}")
-
-                # Add URL/Source
-                url_key = find_key(['url', 'source', '🌐'], article_keys)
-                if url_key:
-                    formatted_sections.append(f"### Source 🌐\n{article[url_key]}")
-
-                return "\n\n".join(formatted_sections)
-
-            # Handle legacy format
-            if 'summary' not in article:
-                return "Summary not available"
-
-            summary_text = article['summary']['text']
-            if "There is not enough extracted data" in summary_text:
-                sections = summary_text.split('### ')
-                formatted_sections = []
-                for section in sections:
-                    if section:
-                        if section.startswith("Date of Article 📅"):
-                            formatted_sections.append(
-                                f"Date of Article 📅\n{article['metadata']['processing_date']}"
-                            )
+                        if parsed_date:
+                            formatted_date = parsed_date.strftime("%B %d, %Y")  # Format as "October 15, 2024"
                         else:
-                            formatted_sections.append(section)
-                return "### " + "### ".join(formatted_sections)
-            else:
-                return summary_text.replace(
-                    "### Date of Article 📅",
-                    "\n\n### Date of Article 📅"
+                            formatted_date = published_date  # Keep original if parsing fails
+                    except Exception as e:
+                        logger.warning(f"Error parsing date: {e}")
+                        formatted_date = published_date  # Keep original if parsing fails
+                else:
+                    formatted_date = "Date not available"
+
+                # Replace the title section using the correct header level
+                import re
+                formatted_text = re.sub(
+                    r'(##### Title of the Article 🛣️\n\n).*?(?=\n\n#####|$)',
+                    f'\\1{metadata_title}',
+                    formatted_text,
+                    flags=re.DOTALL
                 )
+
+                # Replace the date section using the correct header level
+                formatted_text = re.sub(
+                    r'(##### Date of Article 📅\n\n).*?(?=\n\n#####|$)',
+                    f'\\1{formatted_date}',
+                    formatted_text,
+                    flags=re.DOTALL
+                )
+
+            else:
+                formatted_text = "Summary text not available"
+
+            # Add source URL if not already present
+            if "Source 🌐" not in formatted_text and "🌐 URL" not in formatted_text:
+                formatted_text += f"\n\n##### Source 🌐\n{article['metadata']['url']}"
+
+            # Add article ID at the end
+            article_id = article.get('_id', 'ID not available')
+            formatted_text += f"\n\n##### Article ID 🆔\n{article_id}"
+
+            return formatted_text
 
         except Exception as e:
             logger.error(f"Error formatting article summary: {str(e)}", exc_info=True)
